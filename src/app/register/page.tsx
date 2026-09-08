@@ -2,16 +2,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Zap, ArrowLeft, Mail } from "lucide-react";
+import {
+  Zap,
+  ArrowLeft,
+  Mail,
+} from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { ApiError } from "@/lib/api-client";
+
+type RegisterType = "platform-owner" | "tenant-staff" | "tenant";
 
 export default function RegisterPage() {
   const { register, verifyRegister } = useAuth();
   const router = useRouter();
 
-  const [step, setStep] = useState<"form" | "otp">("form");
+  const [registerType, setRegisterType] =
+    useState<RegisterType>("tenant");
 
+  const [step, setStep] = useState<"form" | "otp">("form");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,6 +27,10 @@ export default function RegisterPage() {
   const [whatsappMobile, setWhatsappMobile] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [panNumber, setPanNumber] = useState("");
+  const [aadhaarNumber, setAadhaarNumber] = useState("");
+
 
   const [otpId, setOtpId] = useState("");
   const [otpCode, setOtpCode] = useState("");
@@ -35,36 +47,97 @@ export default function RegisterPage() {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const result = await register({
-        firstName: firstName.trim(),
-        lastName: lastName.trim() || undefined,
-        email: email.trim(),
-        mobile: `+91${mobile.trim()}`,
-        whatsappMobile: whatsappMobile.trim() ? `+91${whatsappMobile.trim()}` : undefined,
-        password,
-      });
-      setOtpId(result.otpId);
-      setStep("otp");
-    } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
-      else setError("Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    // PAN for Platform Owner
+    if (
+      registerType === "platform-owner" &&
+      panNumber.trim().length !== 10
+    ) {
+      setError("Please enter a valid PAN number.");
+      return;
     }
+
+    // Aadhaar for Tenant Staff
+    if (
+      registerType === "tenant-staff" &&
+      aadhaarNumber.trim().length !== 12
+    ) {
+      setError("Please enter a valid Aadhaar number.");
+      return;
+    }
+
+    // Existing Tenant registration API
+    if (registerType === "tenant") {
+      setIsSubmitting(true);
+
+      try {
+        const result = await register({
+          firstName: firstName.trim(),
+          lastName: lastName.trim() || undefined,
+          email: email.trim(),
+          mobile: `+91${mobile.trim()}`,
+          whatsappMobile: whatsappMobile.trim()
+            ? `+91${whatsappMobile.trim()}`
+            : undefined,
+          password,
+        });
+
+        setOtpId(result.otpId);
+        setStep("otp");
+      } catch (err) {
+        if (err instanceof ApiError) {
+          setError(err.message);
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    // data for the new registration types --
+    const registrationData = {
+      registerType,
+      firstName: firstName.trim(),
+      lastName: lastName.trim() || undefined,
+      email: email.trim(),
+      mobile: `+91${mobile.trim()}`,
+      whatsappMobile: whatsappMobile.trim()
+        ? `+91${whatsappMobile.trim()}`
+        : undefined,
+      password,
+
+      // Add PAN only for Platform Owner
+      ...(registerType === "platform-owner" && {
+        panNumber: panNumber.trim(),
+      }),
+
+      // Add Aadhaar only for Tenant Staff
+      ...(registerType === "tenant-staff" && {
+        aadhaarNumber: aadhaarNumber.trim(),
+      }),
+    };
+
+    // Platform Owner and Tenant Staff API ----------
+
+
+
   }
 
   async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
+
     try {
       await verifyRegister(otpId, otpCode.trim());
       router.push("/dashboard");
     } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
-      else setError("Invalid or expired code. Please try again.");
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Invalid or expired code. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -85,28 +158,87 @@ export default function RegisterPage() {
             <div className="bg-[#5b4ef9] p-2 rounded-lg">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-semibold text-gray-900">KarobarOne</span>
+            <span className="text-2xl font-semibold text-gray-900">
+              KarobarOne
+            </span>
           </div>
 
           {step === "form" ? (
             <>
               <div className="text-center mb-4">
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h1>
-                <p className="text-gray-600 text-sm">Sign up to get started</p>
+                <p className="text-gray-600 text-sm">
+                  Sign up to get started
+                </p>
               </div>
 
-              <form onSubmit={handleSubmitForm} className="space-y-3">
+              {/* Registration Type  */}
+              <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-lg mb-4">
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegisterType("platform-owner");
+                    setError(null);
+                  }}
+                  className={`rounded-md py-2  px-2 text-xs sm:text-sm font-semibold transition-colors ${registerType === "platform-owner"
+                    ? "bg-[#5b4ef9] text-white shadow"
+                    : "text-gray-600 hover:text-[#5b4ef9]"
+                    }`}
+                >
+                  Platform Owner
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegisterType("tenant-staff");
+                    setError(null);
+                  }}
+                  className={`rounded-md py-2 px-2 text-xs sm:text-sm font-semibold transition-colors ${registerType === "tenant-staff"
+                    ? "bg-[#5b4ef9] text-white shadow"
+                    : "text-gray-600 hover:text-[#5b4ef9]"
+                    }`}
+                >
+                  Tenant Staff
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegisterType("tenant");
+                    setError(null);
+                  }}
+                  className={`rounded-md py-2 px-2 text-xs sm:text-sm font-semibold transition-colors ${registerType === "tenant"
+                    ? "bg-[#5b4ef9] text-white shadow"
+                    : "text-gray-600 hover:text-[#5b4ef9]"
+                    }`}
+                >
+                  Tenant
+                </button>
+
+              </div>
+
+
+              <form
+                onSubmit={handleSubmitForm}
+                className="space-y-3"
+              >
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) =>
+                      setFirstName(e.target.value)
+                    }
                     placeholder="First Name"
                     required
                     className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b4ef9]"
                   />
                   <input
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) =>
+                      setLastName(e.target.value)
+                    }
                     placeholder="Last Name"
                     className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b4ef9]"
                   />
@@ -115,7 +247,9 @@ export default function RegisterPage() {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
                   placeholder="Email Address"
                   required
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b4ef9]"
@@ -128,7 +262,13 @@ export default function RegisterPage() {
                     </span>
                     <input
                       value={mobile}
-                      onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      onChange={(e) =>
+                        setMobile(
+                          e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10)
+                        )
+                      }
                       placeholder="Mobile Number"
                       inputMode="numeric"
                       maxLength={10}
@@ -136,13 +276,20 @@ export default function RegisterPage() {
                       className="w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b4ef9]"
                     />
                   </div>
+
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
                       +91
                     </span>
                     <input
                       value={whatsappMobile}
-                      onChange={(e) => setWhatsappMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      onChange={(e) =>
+                        setWhatsappMobile(
+                          e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10)
+                        )
+                      }
                       placeholder="WhatsApp (optional)"
                       inputMode="numeric"
                       maxLength={10}
@@ -150,6 +297,42 @@ export default function RegisterPage() {
                     />
                   </div>
                 </div>
+
+                {registerType === "platform-owner" && (
+                  <input
+                    value={panNumber}
+                    onChange={(e) =>
+                      setPanNumber(
+                        e.target.value
+                          .toUpperCase()
+                          .replace(/[^A-Z0-9]/g, "")
+                          .slice(0, 10)
+                      )
+                    }
+                    placeholder="PAN Number"
+                    maxLength={10}
+                    required
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg uppercase focus:outline-none focus:ring-2 focus:ring-[#5b4ef9]"
+                  />
+                )}
+
+                {registerType === "tenant-staff" && (
+                  <input
+                    value={aadhaarNumber}
+                    onChange={(e) =>
+                      setAadhaarNumber(
+                        e.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 12)
+                      )
+                    }
+                    placeholder="Aadhaar Number"
+                    inputMode="numeric"
+                    maxLength={12}
+                    required
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b4ef9]"
+                  />
+                )}
 
                 <input
                   type="password"
@@ -160,6 +343,7 @@ export default function RegisterPage() {
                   minLength={8}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b4ef9]"
                 />
+
                 <input
                   type="password"
                   value={confirmPassword}
@@ -180,26 +364,56 @@ export default function RegisterPage() {
                   disabled={isSubmitting}
                   className="w-full bg-[#5b4ef9] text-white py-3 rounded-lg hover:bg-[#4a3ee0] transition-colors disabled:opacity-50"
                 >
-                  {isSubmitting ? "Creating Account..." : "Create Account"}
+                  {isSubmitting
+                    ? registerType === "platform-owner"
+                      ? "Registering Platform Owner..."
+                      : registerType === "tenant-staff"
+                        ? "Registering Tenant Staff..."
+                        : "Creating Account..."
+                    : registerType === "platform-owner"
+                      ? "Register as Platform Owner"
+                      : registerType === "tenant-staff"
+                        ? "Register as Tenant Staff"
+                        : "Create Account"}
                 </button>
+
               </form>
             </>
           ) : (
             <>
               <div className="text-center mb-4">
+
                 <div className="w-14 h-14 bg-[#5b4ef9]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-6 h-6 text-[#5b4ef9]" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h1>
+
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  Check Your Email
+                </h1>
+
                 <p className="text-gray-600 text-sm">
-                  We sent a 6-digit code to <span className="font-medium">{email}</span>
+                  We sent a 6-digit code to{" "}
+                  <span className="font-medium">
+                    {email}
+                  </span>
                 </p>
+
               </div>
 
-              <form onSubmit={handleVerifyOtp} className="space-y-3">
+              <form
+                onSubmit={handleVerifyOtp}
+                className="space-y-3"
+              >
+
                 <input
                   value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
+                  onChange={(e) =>
+                    setOtpCode(
+                      e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 6)
+                    )
+                  }
                   placeholder="Enter 6-digit code"
                   maxLength={6}
                   required
@@ -214,10 +428,15 @@ export default function RegisterPage() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || otpCode.length !== 6}
+                  disabled={
+                    isSubmitting ||
+                    otpCode.length !== 6
+                  }
                   className="w-full bg-[#5b4ef9] text-white py-3 rounded-lg hover:bg-[#4a3ee0] transition-colors disabled:opacity-50"
                 >
-                  {isSubmitting ? "Verifying..." : "Verify & Continue"}
+                  {isSubmitting
+                    ? "Verifying..."
+                    : "Verify & Continue"}
                 </button>
 
                 <button
@@ -227,18 +446,25 @@ export default function RegisterPage() {
                 >
                   ← Back to edit details
                 </button>
+
               </form>
             </>
           )}
 
+          {/* Login Link */}
           <div className="mt-5 text-center">
             <p className="text-gray-600 text-sm">
               Already have an account?{" "}
-              <Link href="/login" className="text-[#5b4ef9] hover:underline font-semibold">
+
+              <Link
+                href="/login"
+                className="text-[#5b4ef9] hover:underline font-semibold"
+              >
                 Login
               </Link>
             </p>
           </div>
+
         </div>
       </div>
     </div>
