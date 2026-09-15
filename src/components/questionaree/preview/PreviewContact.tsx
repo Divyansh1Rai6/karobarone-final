@@ -7,15 +7,24 @@ import {
   FaInstagram,
   FaLinkedinIn,
 } from "react-icons/fa";
+
+const designColor: Record<string, string> = {
+  design1: "text-blue-600",
+  design2: "text-purple-600",
+  design3: "text-emerald-600",
+  design4: "text-orange-600",
+};
+
 export function PreviewContact() {
   const { data } = useQuestionnaire();
+  const selectedColor = designColor[data.selectedDesign] ?? "text-blue-600";
 
   return (
     <section className="border-t bg-white px-8 py-12">
 
       <div className="mb-8">
 
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
+        <p className={`text-sm font-semibold uppercase tracking-widest ${selectedColor}`}>
           Contact Us
         </p>
 
@@ -33,7 +42,7 @@ export function PreviewContact() {
 
           <div className="flex items-center gap-4 rounded-xl border p-4">
 
-            <Phone className="h-5 w-5 text-blue-600" />
+            <Phone className={`h-5 w-5 ${selectedColor}`} />
 
             <div>
               <p className="text-xs text-slate-500">
@@ -49,7 +58,7 @@ export function PreviewContact() {
 
           <div className="flex items-center gap-4 rounded-xl border p-4">
 
-            <Mail className="h-5 w-5 text-blue-600" />
+            <Mail className={`h-5 w-5 ${selectedColor}`} />
 
             <div>
 
@@ -67,7 +76,7 @@ export function PreviewContact() {
 
           <div className="flex items-center gap-4 rounded-xl border p-4">
 
-            <User className="h-5 w-5 text-blue-600" />
+            <User className={`h-5 w-5 ${selectedColor}`} />
 
             <div>
 
@@ -97,7 +106,7 @@ export function PreviewContact() {
 
             <div className="mb-4 flex items-center gap-2">
 
-              <Clock className="h-5 w-5 text-blue-600" />
+              <Clock className={`h-5 w-5 ${selectedColor}`} />
 
               <h3 className="font-semibold">
                 Business Hours

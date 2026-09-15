@@ -3,8 +3,16 @@
 import { useQuestionnaire } from "@/context/questionnaire-context";
 import { Building2, Calendar, User } from "lucide-react";
 
+const designBorder: Record<string, string> = {
+  design1: "blue-600",
+  design2: "purple-600",
+  design3: "emerald-600",
+  design4: "orange-600",
+};
+
 export function PreviewAbout() {
   const { data } = useQuestionnaire();
+  const selectedKey = designBorder[data.selectedDesign] ?? "blue-600";
 
   const hasContent =
     data.companyHistory ||
@@ -18,7 +26,7 @@ export function PreviewAbout() {
 
       <div className="mb-8">
 
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
+        <p className={`text-sm font-semibold uppercase tracking-widest text-${selectedKey}`}>
           About Us
         </p>
 
@@ -64,7 +72,7 @@ export function PreviewAbout() {
 
               <div className="mb-4 flex items-center gap-3">
 
-                <User className="h-5 w-5 text-blue-600" />
+                <User className={`h-5 w-5 text-${selectedKey}`} />
 
                 <h4 className="font-semibold">
                   Founder
@@ -90,7 +98,7 @@ export function PreviewAbout() {
 
               <div className="mb-4 flex items-center gap-3">
 
-                <Calendar className="h-5 w-5 text-blue-600" />
+                <Calendar className={`h-5 w-5 text-${selectedKey}`} />
 
                 <h4 className="font-semibold">
                   Established
@@ -114,7 +122,7 @@ export function PreviewAbout() {
 
             <div className="mb-3 flex items-center gap-2">
 
-              <Building2 className="h-5 w-5 text-blue-600" />
+              <Building2 className={`h-5 w-5 text-${selectedKey}`} />
 
               <h3 className="font-semibold">
 

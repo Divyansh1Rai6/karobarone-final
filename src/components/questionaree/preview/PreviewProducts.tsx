@@ -3,15 +3,23 @@
 import { useQuestionnaire } from "@/context/questionnaire-context";
 import { Package } from "lucide-react";
 
+const designText: Record<string, string> = {
+  design1: "text-blue-600",
+  design2: "text-purple-600",
+  design3: "text-emerald-600",
+  design4: "text-orange-600",
+};
+
 export function PreviewProducts() {
   const { data } = useQuestionnaire();
+  const selectedText = designText[data.selectedDesign] ?? "text-blue-600";
 
   return (
     <section className="border-t bg-slate-50 px-8 py-12">
 
       <div className="mb-8">
 
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
+        <p className={`text-sm font-semibold uppercase tracking-widest ${selectedText}`}>
           {data.businessNature === "service"
             ? "Our Services"
             : "Our Products"}
@@ -101,7 +109,7 @@ export function PreviewProducts() {
 
                     {item.salePrice && (
 
-                      <span className="text-xl font-bold text-blue-600">
+                      <span className={`text-xl font-bold ${selectedText}`}>
 
                         ₹{item.salePrice}
 

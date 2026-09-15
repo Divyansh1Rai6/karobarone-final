@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Package, Wrench } from "lucide-react"
 import { isValidPhone, isValidEmail, isValidGST, isValidPAN, isValidBusinessName } from "@/lib/validation"
+import { BusinessQuestionTable } from "../business-question-table"
 
 export function Step2BasicDetails() {
   const { data, updateData } = useQuestionnaire()
@@ -337,6 +338,30 @@ export function Step2BasicDetails() {
               onChange={(file) => updateData({ taxDocument: file })}
             />
           )}
+        </div>
+
+        <div className="grid gap-4 pt-2 border-t border-border">
+          <h3 className="font-medium text-foreground pt-4">Choose your website design</h3>
+          <div className="grid md:grid-cols-4 gap-4">
+            {[
+              { value: "design1", title: "Design 1", description: "Premium corporate" },
+              { value: "design2", title: "Design 2", description: "Modern visual" },
+              { value: "design3", title: "Design 3", description: "Gallery services" },
+              { value: "design4", title: "Design 4", description: "Creative agency" },
+            ].map((design) => (
+              <SelectableCard
+                key={design.value}
+                title={design.title}
+                description={design.description}
+                selected={data.selectedDesign === design.value}
+                onClick={() => updateData({ selectedDesign: design.value as "design1" | "design2" | "design3" | "design4" })}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-4 pt-2 border-t border-border">
+          <BusinessQuestionTable />
         </div>
       </div>
 

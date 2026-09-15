@@ -3,11 +3,19 @@
 import { useQuestionnaire } from "@/context/questionnaire-context";
 import { ArrowRight, Phone } from "lucide-react";
 
+const designTheme: Record<string, string> = {
+  design1: "from-blue-900 via-blue-700 to-cyan-500",
+  design2: "from-violet-900 via-purple-700 to-pink-500",
+  design3: "from-emerald-900 via-green-700 to-lime-500",
+  design4: "from-slate-900 via-orange-700 to-amber-500",
+};
+
 export function PreviewHero() {
   const { data } = useQuestionnaire();
+  const currentDesign = designTheme[data.selectedDesign] ?? "from-indigo-600 via-blue-600 to-cyan-600";
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 text-white">
+    <section className={`relative overflow-hidden bg-gradient-to-r ${currentDesign} text-white`}>
 
       {/* Background Effect */}
 
@@ -20,9 +28,7 @@ export function PreviewHero() {
 
         <div className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm backdrop-blur">
 
-          {data.businessNature
-            ? data.businessNature.toUpperCase()
-            : "BUSINESS WEBSITE"}
+          {data.selectedDesign ? data.selectedDesign.toUpperCase() : "BUSINESS WEBSITE"}
 
         </div>
 

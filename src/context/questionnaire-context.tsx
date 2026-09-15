@@ -29,6 +29,8 @@ export interface QuestionnaireData {
   email: string
   brandTagline: string
   businessNature: "product" | "service" | ""
+  selectedDesign: "design1" | "design2" | "design3" | "design4" | ""
+  businessQuestions: Record<string, string>
 
   // Page 2 - Address (new)
   businessAddressLine1: string
@@ -98,6 +100,8 @@ const initialData: QuestionnaireData = {
   email: "",
   brandTagline: "",
   businessNature: "",
+  selectedDesign: "",
+  businessQuestions: {},
   businessAddressLine1: "",
   city: "",
   state: "",
