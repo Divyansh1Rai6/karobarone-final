@@ -1,30 +1,15 @@
-import { Navbar } from "../components/Navbar";
-import { Hero } from "../components/Hero";
-import { SocialProof } from "../components/SocialProof";
-import { Features } from "../components/Features";
-import { Offerings } from "../components/Offerings";
-import { Timeline } from "../components/Timeline";
-import { Pricing } from "../components/Pricing";
-import { Partnerships } from "../components/Partnerships";
-import { Testimonials } from "../components/Testimonials";
-import { About } from "../components/About";
-import { Footer } from "../components/Footer";
+"use client"
 
+import { QuestionnaireProvider } from "@/context/questionnaire-context"
+import { QuestionnaireLayout } from "@/components/questionaree/questionnaire-layout"
+import "./questionnaire.css"
 
-export default function HomePage() {
+export default function Home() {
   return (
-    <div className="bg-white">
-      <Navbar />
-      <Hero />
-      <SocialProof />
-      <Features />
-      <Offerings />
-      <Timeline />
-      <Pricing />
-      <Partnerships />
-      <Testimonials />
-      <About />
-      <Footer />
+    <div className="questionnaire-root">
+      <QuestionnaireProvider>
+        <QuestionnaireLayout />
+      </QuestionnaireProvider>
     </div>
-  );
+  )
 }
