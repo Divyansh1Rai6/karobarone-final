@@ -45,6 +45,52 @@ export interface QuestionnaireData {
   businessType: string // "gst" | "pan" — which registration type is being declared
   taxDocument: File | null
 
+  // Page 4 - Discovery Questions (Q17,18,111 / Q13,14 / Q19,20,21,99,100,101,150 /
+  // Q23 / Q35,29-31,36-39,41 / Q40,33,34,42-44 / Q84,85-94 / Q104-106 / Q103,102,107,155)
+  serviceArea: string
+  websitePurpose: string
+  primaryAction: string
+  customerPriority: string
+  topReasons: string
+  credibilityProof: string[]
+  contactPreferences: string[]
+  q18Engage: string[]
+  q111Languages: string[]
+  q14Secondary: string[]
+  q20Buying: string
+  q21Cycle: string
+  q99Leads: string[]
+  q100Consult: string
+  q101Quote: string
+  q150Visitor: string
+  q31Values: string[]
+  q36ProdDiff: string[]
+  q37ServDiff: string[]
+  q38OperAdv: string[]
+  q39CommAdv: string[]
+  q41Promise: string[]
+  q33Team: string[]
+  q34Highlight: string[]
+  q42NumericalStats: string
+  q43Certificates: string[]
+  q44Awards: string
+  q85Phone: string
+  q87Email: string
+  q86WhatsappSame: string
+  q88LocationType: string
+  q89Address: string
+  q90AddressDisplay: string
+  q91WorkingDays: string
+  q93ResponseTime: string
+  q94Socials: string[]
+  q104Style: string
+  q106Impression: string[]
+  q105ColorApproach: string
+  q103HeroBanner: string
+  q102Assets: string[]
+  q107ImageIntensity: string
+  q155MobileImportance: string
+
   // Page 5 - Business Operating Details
   daysOpen: string[]
   dayTimings: { [day: string]: DayTiming }
@@ -107,6 +153,49 @@ const initialData: QuestionnaireData = {
   panNumber: "",
   businessType: "",
   taxDocument: null,
+  serviceArea: "",
+  websitePurpose: "",
+  primaryAction: "",
+  customerPriority: "",
+  topReasons: "",
+  credibilityProof: [],
+  contactPreferences: [],
+  q18Engage: [],
+  q111Languages: [],
+  q14Secondary: [],
+  q20Buying: "",
+  q21Cycle: "",
+  q99Leads: [],
+  q100Consult: "",
+  q101Quote: "",
+  q150Visitor: "",
+  q31Values: [],
+  q36ProdDiff: [],
+  q37ServDiff: [],
+  q38OperAdv: [],
+  q39CommAdv: [],
+  q41Promise: [],
+  q33Team: [],
+  q34Highlight: [],
+  q42NumericalStats: "",
+  q43Certificates: [],
+  q44Awards: "",
+  q85Phone: "",
+  q87Email: "",
+  q86WhatsappSame: "",
+  q88LocationType: "",
+  q89Address: "",
+  q90AddressDisplay: "",
+  q91WorkingDays: "",
+  q93ResponseTime: "",
+  q94Socials: [],
+  q104Style: "",
+  q106Impression: [],
+  q105ColorApproach: "",
+  q103HeroBanner: "",
+  q102Assets: [],
+  q107ImageIntensity: "",
+  q155MobileImportance: "",
   daysOpen: [],
   dayTimings: {},
   planType: "",
@@ -137,7 +226,9 @@ const initialData: QuestionnaireData = {
 }
 
 // Only these step numbers actually exist in the questionnaire flow
-const validSteps = [1, 2, 5, 6, 11, 12, 12.5, 12.7, 13, 14, 15]
+// NOTE: step 3 (Kriti's Q1-6) will slot in before step 4 once she adds it —
+// make sure 3 ends up before 4 in this array when merging, not after.
+const validSteps = [1, 2, 4, 5, 6, 11, 12, 12.5, 12.7, 13, 14, 15]
 
 interface QuestionnaireContextType {
   data: QuestionnaireData
@@ -215,20 +306,20 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <QuestionnaireContext.Provider
-      value={{
-        data,
-        updateData,
-        currentStep,
-        setCurrentStep,
-        totalSteps,
-        nextStep,
-        prevStep,
-        resetQuestionnaire,
-      }}
-    >
-      {children}
-    </QuestionnaireContext.Provider>
+      <QuestionnaireContext.Provider
+          value={{
+            data,
+            updateData,
+            currentStep,
+            setCurrentStep,
+            totalSteps,
+            nextStep,
+            prevStep,
+            resetQuestionnaire,
+          }}
+      >
+        {children}
+      </QuestionnaireContext.Provider>
   )
 }
 

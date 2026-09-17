@@ -1,346 +1,326 @@
 "use client"
 
-import { useState } from "react"
 import { useQuestionnaire } from "@/context/questionnaire-context"
 import { StepWrapper } from "../step-wrapper"
 import { NavigationButtons } from "../navigation-buttons"
-import { SelectableCard } from "../selectable-card"
-import { FileUpload } from "../file-upload"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Package, Wrench } from "lucide-react"
-import { isValidPhone, isValidEmail, isValidGST, isValidPAN, isValidBusinessName } from "@/lib/validation"
+import { Input } from "@/components/ui/input"
+import { Check } from "lucide-react"
+
+const BUSINESS_NATURE_OPTIONS = ["product", "service"]
+
+function NaturePills({
+                       options,
+                       value,
+                       onChange,
+                     }: {
+  options: string[]
+  value: string
+  onChange: (v: "product" | "service") => void
+}) {
+  return (
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => {
+          const selected = value === opt
+
+          return (
+              <button
+                  key={opt}
+                  type="button"
+                  onClick={() => onChange(opt as "product" | "service")}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-full border-2 text-sm font-medium capitalize transition-colors ${
+                      selected
+                          ? "border-accent bg-accent/10 text-foreground"
+                          : "border-border bg-card text-muted-foreground hover:border-muted-foreground/40"
+                  }`}
+              >
+                {selected && <Check className="w-3.5 h-3.5 text-accent" />}
+                {opt}
+              </button>
+          )
+        })}
+      </div>
+  )
+}
 
 export function Step2BasicDetails() {
   const { data, updateData } = useQuestionnaire()
-  const [errors, setErrors] = useState<Record<string, string>>({})
-
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {}
-
-    if (!isValidBusinessName(data.businessName)) {
-      newErrors.businessName = data.businessName.trim().length === 0
-        ? "Business name is required."
-        : "Business name must be 100 characters or less."
-    }
-
-    if (!data.legalName.trim()) {
-      newErrors.legalName = "Legal / registered business name is required."
-    }
-
-    if (!data.contactPerson.trim()) {
-      newErrors.contactPerson = "Contact person name is required."
-    }
-
-    if (!isValidPhone(data.phoneNumber)) {
-      newErrors.phoneNumber = "Enter a valid 10-digit Indian mobile number."
-    }
-
-    if (!isValidEmail(data.email)) {
-      newErrors.email = "Enter a valid email address."
-    }
-
-    if (!data.businessNature) {
-      newErrors.businessNature = "Please select whether you offer products or services."
-    }
-
-    if (!data.industryType.trim()) {
-      newErrors.industryType = "Please specify your industry / business type."
-    }
-
-    if (!data.businessAddressLine1.trim()) {
-      newErrors.businessAddressLine1 = "Business address is required."
-    }
-    if (!data.city.trim()) {
-      newErrors.city = "City is required."
-    }
-    if (!data.state.trim()) {
-      newErrors.state = "State is required."
-    }
-    if (!data.postalCode.trim()) {
-      newErrors.postalCode = "Postal code is required."
-    }
-
-    // PAN is always required regardless of GST/PAN registration choice below
-    if (!isValidPAN(data.panNumber)) {
-      newErrors.panNumber = "Enter a valid PAN number (e.g., ABCDE1234F)."
-    }
-
-    if (!data.businessType) {
-      newErrors.businessType = "Please select GST or PAN."
-    } else if (data.businessType === "gst" && !isValidGST(data.gstNumber)) {
-      newErrors.gstNumber = "Enter a valid GST number (e.g., 22AAAAA0000A1Z5)."
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
 
   return (
-    <StepWrapper
-      title="Business Basic Details"
-      description="Tell us about your business and how we can contact you."
-    >
-      <div className="grid gap-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="businessName">Business Name *</Label>
-            <Input
-              id="businessName"
-              placeholder="Enter your business name"
-              value={data.businessName}
-              maxLength={100}
-              onChange={(e) => updateData({ businessName: e.target.value })}
-            />
-            {errors.businessName && (
-              <p className="text-xs text-destructive">{errors.businessName}</p>
-            )}
-          </div>
+      <StepWrapper title="Business Basic Details">
+        <div className="grid gap-6">
 
-          <div className="grid gap-2">
-            <Label htmlFor="legalName">Legal / Registered Name *</Label>
-            <Input
-              id="legalName"
-              placeholder="e.g., XYZ Enterprises Pvt Ltd"
-              value={data.legalName}
-              onChange={(e) => updateData({ legalName: e.target.value })}
-            />
-            {errors.legalName && (
-              <p className="text-xs text-destructive">{errors.legalName}</p>
-            )}
-          </div>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid gap-1.5">
+              <Label htmlFor="businessName">
+                Business / Brand Name
+              </Label>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="contactPerson">Contact Person Name *</Label>
-            <Input
-              id="contactPerson"
-              placeholder="Enter contact person name"
-              value={data.contactPerson}
-              onChange={(e) => updateData({ contactPerson: e.target.value })}
-            />
-            {errors.contactPerson && (
-              <p className="text-xs text-destructive">{errors.contactPerson}</p>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="designation">Designation</Label>
-            <Input
-              id="designation"
-              placeholder="e.g., Owner, Manager, Director"
-              value={data.designation}
-              onChange={(e) => updateData({ designation: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="phoneNumber">Phone Number *</Label>
-            <Input
-              id="phoneNumber"
-              type="tel"
-              placeholder="+91 XXXXX XXXXX"
-              value={data.phoneNumber}
-              onChange={(e) => updateData({ phoneNumber: e.target.value })}
-            />
-            {errors.phoneNumber && (
-              <p className="text-xs text-destructive">{errors.phoneNumber}</p>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email Address *</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@business.com"
-              value={data.email}
-              onChange={(e) => updateData({ email: e.target.value })}
-            />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="brandTagline">Brand Tagline</Label>
-          <Input
-            id="brandTagline"
-            placeholder="Your catchy brand tagline or slogan"
-            value={data.brandTagline}
-            onChange={(e) => updateData({ brandTagline: e.target.value })}
-          />
-          <p className="text-xs text-muted-foreground">
-            A short phrase that captures your brand essence
-          </p>
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="industryType">Industry / Business Type *</Label>
-          <Input
-            id="industryType"
-            placeholder="e.g., Retail, Manufacturing, Restaurant, Services"
-            value={data.industryType}
-            onChange={(e) => updateData({ industryType: e.target.value })}
-          />
-          {errors.industryType && (
-            <p className="text-xs text-destructive">{errors.industryType}</p>
-          )}
-        </div>
-
-        {/* Business Address */}
-        <div className="grid gap-4 pt-2 border-t border-border">
-          <h3 className="font-medium text-foreground pt-4">Business Address</h3>
-
-          <div className="grid gap-2">
-            <Label htmlFor="businessAddressLine1">Address Line 1 *</Label>
-            <Input
-              id="businessAddressLine1"
-              placeholder="Shop/Building No., Street"
-              value={data.businessAddressLine1}
-              onChange={(e) => updateData({ businessAddressLine1: e.target.value })}
-            />
-            {errors.businessAddressLine1 && (
-              <p className="text-xs text-destructive">{errors.businessAddressLine1}</p>
-            )}
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="city">City *</Label>
               <Input
-                id="city"
-                placeholder="City"
-                value={data.city}
-                onChange={(e) => updateData({ city: e.target.value })}
+                  id="businessName"
+                  type="text"
+                  value={data.businessName || ""}
+                  onChange={(e) =>
+                      updateData({ businessName: e.target.value })
+                  }
+                  placeholder="e.g., KarobarOne"
               />
-              {errors.city && (
-                <p className="text-xs text-destructive">{errors.city}</p>
-              )}
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="state">State *</Label>
-              <Input
-                id="state"
-                placeholder="State"
-                value={data.state}
-                onChange={(e) => updateData({ state: e.target.value })}
-              />
-              {errors.state && (
-                <p className="text-xs text-destructive">{errors.state}</p>
-              )}
-            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="legalName">
+                Registered Legal Name
+              </Label>
 
-            <div className="grid gap-2">
-              <Label htmlFor="postalCode">Postal Code *</Label>
               <Input
-                id="postalCode"
-                placeholder="e.g., 211001"
-                value={data.postalCode}
-                onChange={(e) => updateData({ postalCode: e.target.value })}
+                  id="legalName"
+                  type="text"
+                  value={data.legalName || ""}
+                  onChange={(e) =>
+                      updateData({ legalName: e.target.value })
+                  }
+                  placeholder="e.g., KarobarOne Private Limited"
               />
-              {errors.postalCode && (
-                <p className="text-xs text-destructive">{errors.postalCode}</p>
-              )}
             </div>
           </div>
-        </div>
 
-        {/* Business Nature: Product or Service */}
-        <div className="grid gap-3">
-          <Label>What does your business offer? *</Label>
-          <div className="grid md:grid-cols-2 gap-4">
-            <SelectableCard
-              title="Product"
-              description="I sell physical or digital products"
-              icon={<Package className="w-5 h-5" />}
-              selected={data.businessNature === "product"}
-              onClick={() => updateData({ businessNature: "product" })}
-            />
-            <SelectableCard
-              title="Service"
-              description="I offer services or expertise"
-              icon={<Wrench className="w-5 h-5" />}
-              selected={data.businessNature === "service"}
-              onClick={() => updateData({ businessNature: "service" })}
-            />
+          {/* Contact Person Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid gap-1.5">
+              <Label htmlFor="contactPerson">
+                Contact Person Name
+              </Label>
+
+              <Input
+                  id="contactPerson"
+                  type="text"
+                  value={data.contactPerson || ""}
+                  onChange={(e) =>
+                      updateData({ contactPerson: e.target.value })
+                  }
+                  placeholder="e.g., John Doe"
+              />
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="designation">
+                Designation
+              </Label>
+
+              <Input
+                  id="designation"
+                  type="text"
+                  value={data.designation || ""}
+                  onChange={(e) =>
+                      updateData({ designation: e.target.value })
+                  }
+                  placeholder="e.g., Founder / Managing Director"
+              />
+            </div>
           </div>
-          {errors.businessNature && (
-            <p className="text-xs text-destructive">{errors.businessNature}</p>
-          )}
-        </div>
 
-        {/* GST / PAN Details */}
-        <div className="grid gap-4 pt-2 border-t border-border">
-          <h3 className="font-medium text-foreground pt-4">Business Tax Details</h3>
+          {/* Communication Block */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid gap-1.5">
+              <Label htmlFor="phoneNumber">
+                Primary Phone Number
+              </Label>
 
-          {/* PAN is now always collected, regardless of GST/PAN registration choice */}
-          <div className="grid gap-2">
-            <Label htmlFor="panNumber">PAN Number *</Label>
+              <Input
+                  id="phoneNumber"
+                  type="text"
+                  value={data.phoneNumber || ""}
+                  onChange={(e) =>
+                      updateData({ phoneNumber: e.target.value })
+                  }
+                  placeholder="+91 XXXXX XXXXX"
+              />
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="email">
+                Business Email Address
+              </Label>
+
+              <Input
+                  id="email"
+                  type="email"
+                  value={data.email || ""}
+                  onChange={(e) =>
+                      updateData({ email: e.target.value })
+                  }
+                  placeholder="info@yourbusiness.com"
+              />
+            </div>
+          </div>
+
+          {/* Business Attributes */}
+          <div className="grid gap-1.5">
+            <Label htmlFor="brandTagline">
+              Brand Tagline / Slogan
+            </Label>
+
             <Input
-              id="panNumber"
-              placeholder="ABCDE1234F"
-              value={data.panNumber}
-              onChange={(e) => updateData({ panNumber: e.target.value.toUpperCase() })}
+                id="brandTagline"
+                type="text"
+                value={data.brandTagline || ""}
+                onChange={(e) =>
+                    updateData({ brandTagline: e.target.value })
+                }
+                placeholder="e.g., Empowering Local Digital Commerce"
             />
-            {errors.panNumber && (
-              <p className="text-xs text-destructive">{errors.panNumber}</p>
-            )}
           </div>
 
+          <div className="grid gap-1.5">
+            <Label htmlFor="industryType">
+              Industry Sector Type
+            </Label>
+
+            <Input
+                id="industryType"
+                type="text"
+                value={data.industryType || ""}
+                onChange={(e) =>
+                    updateData({ industryType: e.target.value })
+                }
+                placeholder="e.g., Retail, Manufacturing, IT Software"
+            />
+          </div>
+
+          {/* Business Nature */}
           <div className="grid gap-3">
-            <Label>Registered Under *</Label>
-            <div className="grid md:grid-cols-2 gap-4">
-              <SelectableCard
-                title="GST"
-                description="Business has GST registration"
-                selected={data.businessType === "gst"}
-                onClick={() => updateData({ businessType: "gst" })}
-              />
-              <SelectableCard
-                title="PAN"
-                description="Business operates with PAN only"
-                selected={data.businessType === "pan"}
-                onClick={() => updateData({ businessType: "pan" })}
-              />
-            </div>
-            {errors.businessType && (
-              <p className="text-xs text-destructive">{errors.businessType}</p>
-            )}
+            <Label>
+              What is the primary nature of your business transactions?
+            </Label>
+
+            <NaturePills
+                options={BUSINESS_NATURE_OPTIONS}
+                value={data.businessNature}
+                onChange={(v) =>
+                    updateData({ businessNature: v })
+                }
+            />
           </div>
 
-          {data.businessType === "gst" && (
-            <div className="grid gap-2">
-              <Label htmlFor="gstNumber">GST Number *</Label>
+          {/* Address Fields Block */}
+          <div className="border-t pt-4 mt-2 space-y-4">
+            <h3 className="text-sm font-bold tracking-tight text-foreground">
+              📍 Physical Operational Address
+            </h3>
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="businessAddressLine1">
+                Street Address Line 1
+              </Label>
+
               <Input
-                id="gstNumber"
-                placeholder="22AAAAA0000A1Z5"
-                value={data.gstNumber}
-                onChange={(e) => updateData({ gstNumber: e.target.value.toUpperCase() })}
+                  id="businessAddressLine1"
+                  type="text"
+                  value={data.businessAddressLine1 || ""}
+                  onChange={(e) =>
+                      updateData({
+                        businessAddressLine1: e.target.value,
+                      })
+                  }
+                  placeholder="Building name, Floor, Street details..."
               />
-              {errors.gstNumber && (
-                <p className="text-xs text-destructive">{errors.gstNumber}</p>
-              )}
             </div>
-          )}
 
-          {data.businessType && (
-            <FileUpload
-              label={data.businessType === "gst" ? "Upload GST Document" : "Upload PAN Document"}
-              description="Upload a clear scan or photo of the document"
-              value={data.taxDocument}
-              onChange={(file) => updateData({ taxDocument: file })}
-            />
-          )}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid gap-1.5">
+                <Label htmlFor="city">City</Label>
+
+                <Input
+                    id="city"
+                    type="text"
+                    value={data.city || ""}
+                    onChange={(e) =>
+                        updateData({ city: e.target.value })
+                    }
+                    placeholder="e.g., Asansol"
+                />
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="state">State</Label>
+
+                <Input
+                    id="state"
+                    type="text"
+                    value={data.state || ""}
+                    onChange={(e) =>
+                        updateData({ state: e.target.value })
+                    }
+                    placeholder="e.g., West Bengal"
+                />
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="postalCode">
+                  Postal Code
+                </Label>
+
+                <Input
+                    id="postalCode"
+                    type="text"
+                    value={data.postalCode || ""}
+                    onChange={(e) =>
+                        updateData({
+                          postalCode: e.target.value,
+                        })
+                    }
+                    placeholder="e.g., 713334"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* GST / PAN Config Layer */}
+          <div className="border-t pt-4 space-y-4">
+            <h3 className="text-sm font-bold tracking-tight text-foreground">
+              ⚖️ Statutory Registrations
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid gap-1.5">
+                <Label htmlFor="gstNumber">
+                  GSTIN Identifier (Optional)
+                </Label>
+
+                <Input
+                    id="gstNumber"
+                    type="text"
+                    value={data.gstNumber || ""}
+                    onChange={(e) =>
+                        updateData({
+                          gstNumber: e.target.value,
+                        })
+                    }
+                    placeholder="19AAAAA0000A1Z5"
+                />
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="panNumber">
+                  Permanent Account Number (PAN)
+                </Label>
+
+                <Input
+                    id="panNumber"
+                    type="text"
+                    value={data.panNumber || ""}
+                    onChange={(e) =>
+                        updateData({
+                          panNumber: e.target.value,
+                        })
+                    }
+                    placeholder="ABCDE1234F"
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <NavigationButtons onNext={validate} />
-    </StepWrapper>
+        <NavigationButtons />
+      </StepWrapper>
   )
 }
