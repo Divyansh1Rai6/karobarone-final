@@ -31,9 +31,8 @@ const businessQuestionRows = [
   { code: "Q182", topic: "What payback period would make an IT investment attractive?", sample: "MCQ: <3 Months / 3–6 Months / 6–12 Months / 12–24 Months / 2–3 Years / Depends on Strategic Value / Not Sure" },
   { code: "Q183", topic: "Which financial return matters most from technology investment?", sample: "MCQ: Revenue Increase / Cost Reduction / Employee Time Saved / More Leads / Higher Conversion / Repeat Sales / Lower Acquisition Cost / Reduced Errors / Scalability / Combination" },
   { code: "Q184", topic: "Which non-financial return matters most?", sample: "MCQ: Better Customer Experience / Brand Credibility / Faster Decisions / Better Data / Employee Productivity / Process Control / Compliance / Scalability / Competitive Advantage" },
-  { code: "Q185", topic: "Would you prefer to start with one small high-value solution, an MVP, or a broader digital transformation?", sample: "One priority / MVP / phased / integrated / consultation first" },
+  { code: "Q185", topic: "How should IT investments be justified internally?", sample: "MCQ: Direct ROI / Payback Period / Revenue Growth / Cost Saving / Time Saving / Competitive Necessity / Strategic Growth / Customer Experience / Combination" },
   { code: "Q186", topic: "Which investment profile best reflects your preference?", sample: "MCQ: Very Conservative / Small Experiments / Invest After Proof / Moderate Growth Investment / Aggressive Digital Expansion / Depends on Business Case" },
-  { code: "Q187", topic: "Which of these 3-4 colour combinations do you prefer?", sample: "A — Corporate Blue / Navy + Royal Blue + Light Blue + White; B — Premium Dark Charcoal + Graphite + Gold; C — Technology Deep Navy + Indigo + Cyan + White; D — Industrial Charcoal + Steel Grey + Orange + White; E — Natural Forest Green + Emerald + Mint + White; F — Minimal Professional Black + Slate Grey + Light Grey + White" },
   { code: "Q188", topic: "Which overall colour personality should your website have?", sample: "MCQ: Corporate & Trustworthy / Premium & Sophisticated / Technology & Modern / Natural & Sustainable / Energetic & Bold / Warm & Approachable / Industrial & Technical / Minimal & Professional / Luxury / Creative / Healthcare / Clean, Let the system recommend" },
   { code: "Q189", topic: "Which of these 3-4 colour combinations do you prefer for your website?", sample: "Website palette options: Corporate Blue / Premium Dark / Modern SaaS / Industrial Engineering / Green Professional / Luxury Black & Gold / Elegant Burgundy / Healthcare Clean / Warm Business / Modern Purple / Bold Red / Minimal Neutral / Ocean Professional / Earth & Nature / Creative Coral / Royal Premium / Midnight Blue / Let us recommend" },
 ]
@@ -45,6 +44,7 @@ const dropdownOptions: Record<string, string[]> = {
   Q182: ["<3 Months", "3–6 Months", "6–12 Months", "12–24 Months", "2–3 Years", "Depends on Strategic Value", "Not Sure"],
   Q183: ["Revenue Increase", "Cost Reduction", "Employee Time Saved", "More Leads", "Higher Conversion", "Repeat Sales", "Lower Acquisition Cost", "Reduced Errors", "Scalability", "Combination"],
   Q184: ["Better Customer Experience", "Brand Credibility", "Faster Decisions", "Better Data", "Employee Productivity", "Process Control", "Compliance", "Scalability", "Competitive Advantage"],
+  Q185: ["Direct ROI", "Payback Period", "Revenue Growth", "Cost Saving", "Time Saving", "Competitive Necessity", "Strategic Growth", "Customer Experience", "Combination"],
   Q186: [
     "Very Conservative",
     "Small Experiments",
@@ -90,33 +90,6 @@ const dropdownOptions: Record<string, string[]> = {
 }
 
 const subQuestionMap: Record<string, { code: string; topic: string; sample: string; options?: string[] }[]> = {
-  Q186: [
-    {
-      code: "Q187",
-      topic: "Which of these 3-4 colour combinations do you prefer?",
-      sample: "Corporate Blue / Premium Dark / Modern SaaS / Industrial Engineering / Green Professional / Luxury Black & Gold / Elegant Burgundy / Healthcare Clean / Warm Business / Modern Purple / Bold Red / Minimal Neutral / Ocean Professional / Earth & Nature / Creative Coral / Royal Premium / Midnight Blue / Let us recommend",
-      options: [
-        "Corporate Blue",
-        "Premium Dark",
-        "Modern SaaS",
-        "Industrial Engineering",
-        "Green Professional",
-        "Luxury Black & Gold",
-        "Elegant Burgundy",
-        "Healthcare Clean",
-        "Warm Business",
-        "Modern Purple",
-        "Bold Red",
-        "Minimal Neutral",
-        "Ocean Professional",
-        "Earth & Nature",
-        "Creative Coral",
-        "Royal Premium",
-        "Midnight Blue",
-        "Let us recommend",
-      ],
-    },
-  ],
   Q188: [
     {
       code: "Q189",
@@ -150,6 +123,14 @@ export function BusinessQuestionTable() {
   const { data, updateData } = useQuestionnaire()
 
   const answerMap = data.businessQuestions || {}
+  const q183Answered = Boolean(answerMap.Q183?.trim())
+  const visibleQuestionRows = businessQuestionRows.filter((row) => {
+    if ((row.code === "Q184" || row.code === "Q185") && !q183Answered) {
+      return false
+    }
+
+    return true
+  })
 
   return (
     <div className="grid gap-4">
@@ -173,7 +154,7 @@ export function BusinessQuestionTable() {
             </tr>
           </thead>
           <tbody>
-            {businessQuestionRows.map((row, index) => {
+            {visibleQuestionRows.map((row, index) => {
               const hasValue = Boolean(answerMap[row.code]?.trim())
               const subQuestions = subQuestionMap[row.code] || []
 
