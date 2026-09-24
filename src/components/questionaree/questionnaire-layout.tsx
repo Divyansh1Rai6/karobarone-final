@@ -14,10 +14,13 @@ import { Step12BSocialMedia } from "./steps/step-12b-social-media"
 import { Step13Licenses } from "./steps/step-13-licenses"
 import { Step14Review } from "./steps/step-14-review"
 import { Step15Success } from "./steps/step-15-success"
+import ConditionalQuestion from "./ConditionalQuestion"
+import ExampleUsage from "./ExampleUsage"
 
 const steps: { [key: number]: React.ComponentType } = {
   1: Step1Welcome,
   2: Step2BasicDetails,
+  3: ExampleUsage, 
   5: Step5Operating,
   6: Step6ProductsServices,
   11: Step11BusinessUSP,
@@ -27,14 +30,16 @@ const steps: { [key: number]: React.ComponentType } = {
   13: Step13Licenses,
   14: Step14Review,
   15: Step15Success,
+  
 }
 
 export function QuestionnaireLayout() {
   const { currentStep } = useQuestionnaire()
+  console.log("Current Step:", currentStep) // Debugging line to check the current step
 
   const CurrentStepComponent = steps[currentStep] || Step1Welcome
-  const showSidebar = currentStep > 1 && currentStep < 15
-  const showProgress = currentStep > 1 && currentStep < 15
+  const showSidebar = currentStep > 1 && currentStep < 17
+  const showProgress = currentStep > 1 && currentStep < 17
 
   return (
     <div className="min-h-screen bg-background">
